@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Cam - v3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #38bdf8;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #38bdf8;
+        }
+
+        .app-screen {
+            display: none;
+        }
+
+        .app-screen.active {
+            display: block;
+        }
+
+        .user-info {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info span {
+            color: #94a3b8;
+        }
+
+        .user-info strong {
+            color: #38bdf8;
+        }
+
+        .mode-selection {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #1e293b;
+            border: 2px solid #38bdf8;
+            color: #38bdf8;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+
+        .mode-btn.active {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+
+        .section {
+            display: none;
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .input-group label input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #334155;
+            border-radius: 5px;
+            outline: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #38bdf8;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #38bdf8;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #0ea5e9;
+        }
+
+        .btn:disabled {
+            background: #334155;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        video {
+            width: 100%;
+            max-width: 100%;
+            background: #000;
+            border-radius: 10px;
+            margin-top: 20px;
+            object-fit: contain;
+            transition: filter 0.3s ease;
+        }
+
+        video.night-mode {
+            filter: brightness(150%) contrast(120%);
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #064e3b;
+            color: #6ee7b7;
+            border: 1px solid #6ee7b7;
+        }
+
+        .status.error {
+            background: #7f1d1d;
+            color: #fca5a5;
+            border: 1px solid #fca5a5;
+        }
+
+        .status.info {
+            background: #1e3a8a;
+            color: #93c5fd;
+            border: 1px solid #93c5fd;
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .camera-card {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .camera-card:hover {
+            border-color: #38bdf8;
+            transform: translateY(-2px);
+        }
+
+        .camera-card h3 {
+            color: #38bdf8;
+            margin-bottom: 10px;
+        }
+
+        .camera-card p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .video-container {
+            position: relative;
+        }
+
+        .video-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de Login -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-box">
+            <h2>🔐 Iniciar Sesión</h2>
+            <div class="input-group">
+                <label>Tipo de Usuario:</label>
+                <select id="login-role">
+                    <option value="camera">📹 Cámara</option>
+                    <option value="viewer">👁️ Visualización</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Usuario:</label>
+                <input type="text" id="login-username" placeholder="Ingrese usuario">
+            </div>
+            <div class="input-group">
+                <label>Contraseña:</label>
+                <input type="password" id="login-password" placeholder="Ingrese contraseña">
+            </div>
+            <button class="btn" onclick="login()">Iniciar Sesión</button>
+            <div id="login-status" style="margin-top: 15px;"></div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #334155; font-size: 14px; color: #64748b;">
+                <p style="text-align: center;"><strong>Solicitar Credenciales al desarrollador</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla Principal -->
+    <div id="app-screen" class="app-screen">
+        <div class="container">
+            <h1>🎥 Plataforma de monitoreo</h1>
+
+            <div class="user-info">
+                <div>
+                    <span>Usuario: <strong id="current-user"></strong></span>
+                    <span style="margin-left: 20px;">Rol: <strong id="current-role"></strong></span>
+                </div>
+                <button class="btn btn-secondary" style="width: auto; padding: 8px 20px;" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <div class="mode-selection">
+                <button class="mode-btn" onclick="selectMode('camera')">📹 Modo Cámara</button>
+                <button class="mode-btn" onclick="selectMode('viewer')">👁️ Modo Visualización</button>
+            </div>
+
+            <!-- Sección Cámara -->
+            <div id="camera-section" class="section">
+                <h2>📹 Configurar Cámara</h2>
+                <div class="input-group">
+                    <label for="camera-name">Nombre de la Cámara:</label>
+                    <input type="text" id="camera-name" placeholder="Ej: Entrada Principal" value="Cámara 1">
+                </div>
+                <div class="input-group">
+                    <label for="video-quality">Calidad de Video:</label>
+                    <select id="video-quality">
+                        <option value="high">Alta (1080p - 2.5 Mbps)</option>
+                        <option value="medium" selected>Media (720p - 1.5 Mbps)</option>
+                        <option value="low">Baja (480p - 800 Kbps)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>
+                        <input type="checkbox" id="night-mode"> 🌙 Modo Nocturno
+                    </label>
+                </div>
+                <div class="input-group">
+                    <label for="brightness">☀️ Brillo: <span id="brightness-value">100</span>%</label>
+                    <input type="range" id="brightness" min="50" max="200" value="100">
+                </div>
+                <div class="input-group">
+                    <label for="contrast">🎨 Contraste: <span id="contrast-value">100</span>%</label>
+                    <input type="range" id="contrast" min="50" max="200" value="100">
+                </div>
+                <div class="input-group">
+                    <label for="zoom">🔍 Zoom: <span id="zoom-value">1.0</span>x</label>
+                    <input type="range" id="zoom" min="1" max="3" step="0.1" value="1">
+                </div>
+                <button class="btn" id="start-camera-btn" onclick="startCamera()">Iniciar Cámara</button>
+                <button class="btn btn-danger hidden" id="stop-camera-btn" onclick="stopCamera()">Detener Cámara</button>
+                <div id="camera-status"></div>
+                <div class="video-container">
+                    <video id="camera-preview" autoplay muted playsinline></video>
+                    <div class="video-info hidden" id="camera-info"></div>
+                </div>
+            </div>
+
+            <!-- Sección Visualización -->
+            <div id="viewer-section" class="section">
+                <h2>👁️ Ver Cámaras</h2>
+                <button class="btn" id="connect-viewer-btn" onclick="connectViewer()">Conectar</button>
+                <button class="btn btn-danger hidden" id="disconnect-viewer-btn" onclick="disconnectViewer()">Desconectar</button>
+                <div id="viewer-status"></div>
+                <div id="cameras-list" class="camera-grid hidden"></div>
+                <div class="video-container hidden" id="viewer-video-container">
+                    <video id="viewer-video" autoplay playsinline controls></video>
+                    <div class="video-info" id="viewer-info"></div>
+                    <button class="btn" style="margin-top: 10px;" onclick="backToCameraList()">← Volver a la lista</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let localStream = null;
+        let peerConnections = new Map();
+        let myId = null;
+        let currentMode = null;
+        let authToken = null;
+        let currentUser = null;
+        let currentRole = null;
+
+        const serverUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupCameraControls();
+            checkExistingSession();
+        });
+
+        function checkExistingSession() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('currentUser');
+            const role = localStorage.getItem('currentRole');
+            
+            if (token && user && role) {
+                authToken = token;
+                currentUser = user;
+                currentRole = role;
+                showApp();
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const role = document.getElementById('login-role').value;
+
+            if (!username || !password) {
+                showStatus('login-status', '⚠️ Complete todos los campos', 'error');
+                return;
+            }
+
+            showStatus('login-status', 'Autenticando...', 'info');
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.userId;
+                    currentRole = data.role;
+                    
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', currentUser);
+                    localStorage.setItem('currentRole', currentRole);
+                    
+                    showStatus('login-status', '✅ Autenticación exitosa', 'success');
+                    setTimeout(() => showApp(), 500);
+                } else {
+                    showStatus('login-status', `❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus('login-status', '❌ Error de conexión', 'error');
+            }
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-screen').classList.add('active');
+            document.getElementById('current-user').textContent = currentUser;
+            document.getElementById('current-role').textContent = currentRole === 'camera' ? '📹 Cámara' : '👁️ Viewer';
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: authToken })
+                });
+            } catch (e) {}
+
+            if (ws) ws.close();
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            
+            localStorage.clear();
+            authToken = null;
+            currentUser = null;
+            currentRole = null;
+            
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-screen').classList.remove('active');
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+        }
+
+        function setupCameraControls() {
+            document.getElementById('brightness').addEventListener('input', (e) => {
+                document.getElementById('brightness-value').textContent = e.target.value;
+                applyVideoFilters();
+            });
+
+            document.getElementById('contrast').addEventListener('input', (e) => {
+                document.getElementById('contrast-value').textContent = e.target.value;
+                applyVideoFilters();
+            });
+
+            document.getElementById('zoom').addEventListener('input', (e) => {
+                document.getElementById('zoom-value').textContent = parseFloat(e.target.value).toFixed(1);
+                applyVideoZoom();
+            });
+
+            document.getElementById('night-mode').addEventListener('change', (e) => {
+                const video = document.getElementById('camera-preview');
+                if (e.target.checked) {
+                    video.classList.add('night-mode');
+                    document.getElementById('brightness').value = 150;
+                    document.getElementById('brightness-value').textContent = '150';
+                    document.getElementById('contrast').value = 120;
+                    document.getElementById('contrast-value').textContent = '120';
+                } else {
+                    video.classList.remove('night-mode');
+                    document.getElementById('brightness').value = 100;
+                    document.getElementById('brightness-value').textContent = '100';
+                    document.getElementById('contrast').value = 100;
+                    document.getElementById('contrast-value').textContent = '100';
+                }
+                applyVideoFilters();
+            });
+        }
+
+        function applyVideoFilters() {
+            const video = document.getElementById('camera-preview');
+            const brightness = document.getElementById('brightness').value;
+            const contrast = document.getElementById('contrast').value;
+            const nightMode = document.getElementById('night-mode').checked;
+            
+            if (!nightMode) {
+                video.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+            }
+        }
+
+        function applyVideoZoom() {
+            const video = document.getElementById('camera-preview');
+            const zoom = document.getElementById('zoom').value;
+            video.style.transform = `scale(${zoom})`;
+            video.style.transformOrigin = 'center center';
+        }
+
+        const iceServers = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            if (mode === 'camera') {
+                document.getElementById('camera-section').classList.add('active');
+            } else {
+                document.getElementById('viewer-section').classList.add('active');
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const statusEl = document.getElementById(elementId);
+            statusEl.className = `status ${type}`;
+            statusEl.textContent = message;
+        }
+
+        async function startCamera() {
+            try {
+                if (currentRole !== 'camera') {
+                    showStatus('camera-status', '❌ No tiene permisos de cámara', 'error');
+                    return;
+                }
+
+                const cameraName = document.getElementById('camera-name').value;
+                const quality = document.getElementById('video-quality').value;
+
+                showStatus('camera-status', 'Solicitando acceso a la cámara...', 'info');
+
+                let videoConfig = {};
+                switch(quality) {
+                    case 'high':
+                        videoConfig = {
+                            facingMode: 'environment',
+                            width: { ideal: 1920, min: 1280 },
+                            height: { ideal: 1080, min: 720 },
+                            frameRate: { ideal: 30, min: 20 }
+                        };
+                        break;
+                    case 'low':
+                        videoConfig = {
+                            facingMode: 'environment',
+                            width: { ideal: 854, max: 854 },
+                            height: { ideal: 480, max: 480 },
+                            frameRate: { ideal: 20, min: 15 }
+                        };
+                        break;
+                    default:
+                        videoConfig = {
+                            facingMode: 'environment',
+                            width: { ideal: 1280, min: 854 },
+                            height: { ideal: 720, min: 480 },
+                            frameRate: { ideal: 25, min: 15 }
+                        };
+                }
+
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: videoConfig,
+                    audio: false
+                });
+
+                document.getElementById('camera-preview').srcObject = localStream;
+                applyVideoFilters();
+                applyVideoZoom();
+                
+                ws = new WebSocket(serverUrl);
+
+                ws.onopen = () => {
+                    ws.send(JSON.stringify({
+                        type: 'authenticate',
+                        token: authToken
+                    }));
+                };
+
+                ws.onmessage = async (event) => {
+                    const data = JSON.parse(event.data);
+                    
+                    switch(data.type) {
+                        case 'authenticated':
+                            ws.send(JSON.stringify({
+                                type: 'register-camera',
+                                name: cameraName
+                            }));
+                            break;
+
+                        case 'registered':
+                            myId = data.id;
+                            showStatus('camera-status', '✅ Cámara activa y transmitiendo', 'success');
+                            document.getElementById('camera-info').classList.remove('hidden');
+                            document.getElementById('camera-info').textContent = `📡 ${cameraName} - Esperando conexiones...`;
+                            document.getElementById('start-camera-btn').classList.add('hidden');
+                            document.getElementById('stop-camera-btn').classList.remove('hidden');
+                            break;
+
+                        case 'viewer-joined':
+                            await createPeerConnection(data.viewerId);
+                            break;
+
+                        case 'answer':
+                            const pc = peerConnections.get(data.from);
+                            if (pc) {
+                                await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                            }
+                            break;
+
+                        case 'ice-candidate':
+                            const peerConn = peerConnections.get(data.from);
+                            if (peerConn && data.candidate) {
+                                await peerConn.addIceCandidate(new RTCIceCandidate(data.candidate));
+                            }
+                            break;
+
+                        case 'auth-failed':
+                            showStatus('camera-status', '❌ Sesión expirada - Inicie sesión nuevamente', 'error');
+                            setTimeout(logout, 2000);
+                            break;
+
+                        case 'error':
+                            showStatus('camera-status', `❌ ${data.message}`, 'error');
+                            break;
+                    }
+                };
+
+                ws.onerror = () => {
+                    showStatus('camera-status', '❌ Error de conexión con el servidor', 'error');
+                };
+
+            } catch (error) {
+                showStatus('camera-status', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function createPeerConnection(viewerId) {
+            const pc = new RTCPeerConnection(iceServers);
+            peerConnections.set(viewerId, pc);
+
+            const quality = document.getElementById('video-quality').value;
+            let maxBitrate, maxFramerate;
+            
+            switch(quality) {
+                case 'high':
+                    maxBitrate = 2500000;
+                    maxFramerate = 30;
+                    break;
+                case 'low':
+                    maxBitrate = 800000;
+                    maxFramerate = 20;
+                    break;
+                default:
+                    maxBitrate = 1500000;
+                    maxFramerate = 25;
+            }
+
+            localStream.getTracks().forEach(track => {
+                const sender = pc.addTrack(track, localStream);
+                
+                if (track.kind === 'video') {
+                    const params = sender.getParameters();
+                    if (!params.encodings) {
+                        params.encodings = [{}];
+                    }
+                    params.encodings[0].maxBitrate = maxBitrate;
+                    params.encodings[0].maxFramerate = maxFramerate;
+                    sender.setParameters(params).catch(e => console.log('Error setting params:', e));
+                }
+            });
+
+            pc.onicecandidate = (event) => {
+                if (event.candidate && ws) {
+                    ws.send(JSON.stringify({
+                        type: 'ice-candidate',
+                        candidate: event.candidate,
+                        target: viewerId
+                    }));
+                }
+            };
+
+            const offer = await pc.createOffer({
+                offerToReceiveVideo: true,
+                offerToReceiveAudio: false
+            });
+            await pc.setLocalDescription(offer);
+
+            ws.send(JSON.stringify({
+                type: 'offer',
+                offer: offer,
+                target: viewerId
+            }));
+
+            document.getElementById('camera-info').textContent = `📡 Transmitiendo a ${peerConnections.size} espectador(es)`;
+        }
+
+        function stopCamera() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            if (ws) {
+                ws.close();
+            }
+            peerConnections.forEach(pc => pc.close());
+            peerConnections.clear();
+            
+            document.getElementById('camera-preview').srcObject = null;
+            document.getElementById('camera-info').classList.add('hidden');
+            document.getElementById('start-camera-btn').classList.remove('hidden');
+            document.getElementById('stop-camera-btn').classList.add('hidden');
+            showStatus('camera-status', '', 'info');
+        }
+
+        function connectViewer() {
+            if (currentRole !== 'viewer') {
+                showStatus('viewer-status', '❌ No tiene permisos de visualización', 'error');
+                return;
+            }
+
+            showStatus('viewer-status', 'Conectando al servidor...', 'info');
+
+            ws = new WebSocket(serverUrl);
+
+            ws.onopen = () => {
+                ws.send(JSON.stringify({
+                    type: 'authenticate',
+                    token: authToken
+                }));
+            };
+
+            ws.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+                
+                switch(data.type) {
+                    case 'authenticated':
+                        ws.send(JSON.stringify({
+                            type: 'register-viewer'
+                        }));
+                        break;
+
+                    case 'registered':
+                        myId = data.id;
+                        showStatus('viewer-status', '✅ Conectado - Cargando cámaras...', 'success');
+                        document.getElementById('connect-viewer-btn').classList.add('hidden');
+                        document.getElementById('disconnect-viewer-btn').classList.remove('hidden');
+                        break;
+
+                    case 'camera-list':
+                        displayCameras(data.cameras);
+                        break;
+
+                    case 'offer':
+                        await handleOffer(data.offer, data.from);
+                        break;
+
+                    case 'ice-candidate':
+                        const pc = peerConnections.get(data.from);
+                        if (pc && data.candidate) {
+                            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        }
+                        break;
+
+                    case 'camera-disconnected':
+                        showStatus('viewer-status', '❌ La cámara se desconectó', 'error');
+                        backToCameraList();
+                        break;
+
+                    case 'auth-failed':
+                        showStatus('viewer-status', '❌ Sesión expirada - Inicie sesión nuevamente', 'error');
+                        setTimeout(logout, 2000);
+                        break;
+
+                    case 'error':
+                        showStatus('viewer-status', `❌ ${data.message}`, 'error');
+                        break;
+                }
+            };
+
+            ws.onerror = () => {
+                showStatus('viewer-status', '❌ Error de conexión', 'error');
+            };
+        }
+
+        function displayCameras(cameras) {
+            const listEl = document.getElementById('cameras-list');
+            listEl.classList.remove('hidden');
+            
+            if (cameras.length === 0) {
+                listEl.innerHTML = '<p style="text-align: center; color: #94a3b8;">No hay cámaras disponibles</p>';
+                return;
+            }
+
+            listEl.innerHTML = cameras.map(cam => `
+                <div class="camera-card" onclick="watchCamera('${cam.id}', '${cam.name}')">
+                    <h3>📹 ${cam.name}</h3>
+                    <p>👁️ ${cam.viewers} espectador(es)</p>
+                    <p style="margin-top: 5px; color: #6ee7b7;">🟢 En línea</p>
+                </div>
+            `).join('');
+        }
+
+        async function watchCamera(cameraId, cameraName) {
+            document.getElementById('cameras-list').classList.add('hidden');
+            document.getElementById('viewer-video-container').classList.remove('hidden');
+            document.getElementById('viewer-info').textContent = `📹 ${cameraName}`;
+
+            ws.send(JSON.stringify({
+                type: 'request-camera',
+                cameraId: cameraId
+            }));
+        }
+
+        async function handleOffer(offer, cameraId) {
+            const pc = new RTCPeerConnection(iceServers);
+            peerConnections.set(cameraId, pc);
+
+            pc.ontrack = (event) => {
+                const video = document.getElementById('viewer-video');
+                video.srcObject = event.streams[0];
+                
+                video.onloadedmetadata = () => {
+                    video.play().catch(e => console.log('Error playing video:', e));
+                };
+            };
+
+            pc.onicecandidate = (event) => {
+                if (event.candidate && ws) {
+                    ws.send(JSON.stringify({
+                        type: 'ice-candidate',
+                        candidate: event.candidate,
+                        target: cameraId
+                    }));
+                }
+            };
+
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            
+            const answer = await pc.createAnswer({
+                offerToReceiveVideo: true,
+                offerToReceiveAudio: false
+            });
+            await pc.setLocalDescription(answer);
+
+            ws.send(JSON.stringify({
+                type: 'answer',
+                answer: answer,
+                target: cameraId
+            }));
+        }
+
+        function backToCameraList() {
+            peerConnections.forEach(pc => pc.close());
+            peerConnections.clear();
+            document.getElementById('viewer-video').srcObject = null;
+            document.getElementById('viewer-video-container').classList.add('hidden');
+            document.getElementById('cameras-list').classList.remove('hidden');
+        }
+
+        function disconnectViewer() {
+            if (ws) {
+                ws.close();
+            }
+            peerConnections.forEach(pc => pc.close());
+            peerConnections.clear();
+            
+            document.getElementById('viewer-video').srcObject = null;
+            document.getElementById('cameras-list').classList.add('hidden');
+            document.getElementById('viewer-video-container').classList.add('hidden');
+            document.getElementById('connect-viewer-btn').classList.remove('hidden');
+            document.getElementById('disconnect-viewer-btn').classList.add('hidden');
+            showStatus('viewer-status', '', 'info');
+        }
+    </script>
+</body>
+</html>
